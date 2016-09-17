@@ -12,9 +12,16 @@ class Trader
 	end
 
 	def trade_loop
-		trade
-		sleep TRADE_INTERVAL
-		trade_loop
+		begin
+			trade
+			sleep TRADE_INTERVAL
+			trade_loop
+		rescue Exception => exception
+			puts exception.message
+			puts exception.backtrace.inspect
+			sleep TRADE_INTERVAL * 5
+			trade_loop
+		end
 	end
 
 	def trade

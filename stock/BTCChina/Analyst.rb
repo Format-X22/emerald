@@ -3,7 +3,7 @@ require_relative 'Book'
 
 class Analyst
 
-	GOOD_AMOUNT = BigDecimal.new('4')
+	GOOD_AMOUNT = BigDecimal.new('4.5')
 	MIN_FAR = BigDecimal.new('0.999')
 	MAX_FAR = BigDecimal.new('1.001')
 	SUPPORT_STEP = BigDecimal.new('0.01')
@@ -22,11 +22,19 @@ class Analyst
 	end
 
 	def order_supported?
-		!!@supported
+		if @supported
+			true
+		else
+			false
+		end
 	end
 
 	def good_position?
-		!!@good_position
+		if @good_position
+			true
+		else
+			false
+		end
 	end
 
 	private
@@ -71,7 +79,7 @@ class Analyst
 	def analytics_supported
 		return unless @broker.order?
 
-		order_price = @broker.order[:price]
+		order_price = BigDecimal.new(@broker.order[:price])
 		step = SUPPORT_STEP
 
 		@supported = false

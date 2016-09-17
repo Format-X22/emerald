@@ -17,23 +17,31 @@ class Broker
 	end
 
 	def order
-		raw = @telegraph.send_private 'getOrders', []
+		unless @order_data
+			raw = @telegraph.send_private 'getOrders', []
 
-		return unless raw
+			return unless raw
 
-		full = raw['order_btccny'][0]
+			full = raw['order_btccny'][0]
 
-		return unless full
+			return unless full
 
-		@order_data = {
-			:id => full['id'],
-			:price => full['price'],
-			:amount => full['amount_original']
-		}
+			@order_data = {
+				:id => full['id'],
+				:price => full['price'],
+				:amount => full['amount_original']
+			}
+		end
+
+		@order_data
 	end
 
 	def order?
-		!!order
+		if order
+			true
+		else
+			false
+		end
 	end
 
 	def set_order (config)
@@ -41,17 +49,20 @@ class Broker
 		price = config[:price]
 		btc = money[:btc]
 		cny = money[:cny]
+		price_str = price.to_f.to_s
 
 		puts '---', 'SET', type, price, btc, cny, '---'
 
 		if type == :ask
-			@telegraph.send_private 'sellOrder2', [price.to_f.to_s, (btc / BigDecimal.new(5)).floor(4).to_f.to_s]
+			@telegraph.send_private 'sellOrder2', [price_str, btc.floor(4).to_f.to_s]
 		else
-			@telegraph.send_private 'buyOrder2', [price.to_f.to_s, (cny / btc / BigDecimal.new(5)).floor(4).to_f.to_s]
+			@telegraph.send_private 'buyOrder2', [price_str, (cny / price).floor(4).to_f.to_s]
 		end
 	end
 
 	def remove_order
+		return unless order?
+
 		puts '---', 'REMOVE', '---'
 
 		@telegraph.send_private 'cancelOrder', [order[:id]]
