@@ -45,6 +45,8 @@ class Broker
 	end
 
 	def set_order (config)
+		return unless config
+
 		type = config[:type]
 		price = config[:price]
 		btc = money[:btc]
@@ -54,9 +56,23 @@ class Broker
 		puts '---', 'SET', type, price, btc, cny, '---'
 
 		if type == :ask
-			@telegraph.send_private 'sellOrder2', [price_str, btc.floor(4).to_f.to_s]
+			amount = btc.floor(4).to_f
+
+			if amount <= 0.01
+				puts 'So small...'
+				return
+			end
+
+			@telegraph.send_private 'sellOrder2', [price_str, amount.to_s]
 		else
-			@telegraph.send_private 'buyOrder2', [price_str, (cny / price).floor(4).to_f.to_s]
+			amount = (cny / price).floor(4).to_f
+
+			if amount <= 0.01
+				puts 'So small...'
+				return
+			end
+
+			@telegraph.send_private 'buyOrder2', [price_str, amount.to_s]
 		end
 	end
 
@@ -77,17 +93,13 @@ class Broker
 	end
 
 	def money
-		unless @money_data
-			money_raw = @telegraph.send_private 'getAccountInfo', []
-			balance = money_raw['balance']
+		money_raw = @telegraph.send_private 'getAccountInfo', []
+		balance = money_raw['balance']
 
-			@money_data = {
-				:cny => BigDecimal.new(balance['cny']['amount']),
-				:btc => BigDecimal.new(balance['btc']['amount'])
-			}
-		end
-
-		@money_data
+		@money_data = {
+			:cny => BigDecimal.new(balance['cny']['amount']),
+			:btc => BigDecimal.new(balance['btc']['amount'])
+		}
 	end
 
 end

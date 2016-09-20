@@ -8,19 +8,16 @@ class Trader
 	def initialize
 		@broker = Broker.new
 		@analyst = Analyst.new @broker
-		trade_loop
-	end
 
-	def trade_loop
-		begin
-			trade
-			sleep TRADE_INTERVAL
-			trade_loop
-		rescue Exception => exception
-			puts exception.message
-			puts exception.backtrace.inspect
-			sleep TRADE_INTERVAL * 5
-			trade_loop
+		while true
+			begin
+				trade
+				sleep TRADE_INTERVAL
+			rescue Exception => exception
+				puts exception.message
+				puts exception.backtrace.inspect
+				sleep TRADE_INTERVAL * 5
+			end
 		end
 	end
 

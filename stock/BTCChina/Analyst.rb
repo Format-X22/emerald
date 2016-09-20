@@ -3,9 +3,9 @@ require_relative 'Book'
 
 class Analyst
 
-	GOOD_AMOUNT = BigDecimal.new('4.5')
-	MIN_FAR = BigDecimal.new('0.999')
-	MAX_FAR = BigDecimal.new('1.001')
+	GOOD_AMOUNT = BigDecimal.new('10')
+	MIN_FAR = BigDecimal.new('0.9995')
+	MAX_FAR = BigDecimal.new('1.0005')
 	SUPPORT_STEP = BigDecimal.new('0.01')
 	BTC_COE = BigDecimal.new('4000')
 
@@ -119,6 +119,7 @@ class Analyst
 					:type => :ask,
 					:price => order[:price] - SUPPORT_STEP
 				}
+				return
 			end
 		else
 			order = @book[:bids].first
@@ -128,8 +129,11 @@ class Analyst
 					:type => :bid,
 					:price => order[:price] + SUPPORT_STEP
 				}
+				return
 			end
 		end
+
+		@good_position = nil
 
 	end
 
