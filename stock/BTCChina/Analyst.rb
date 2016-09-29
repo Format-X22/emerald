@@ -3,16 +3,17 @@ require_relative 'Book'
 
 class Analyst
 
-	GOOD_AMOUNT = BigDecimal.new('10')
+	GOOD_AMOUNT = BigDecimal.new('9')
 	MIN_FAR = BigDecimal.new('0.9995')
 	MAX_FAR = BigDecimal.new('1.0005')
 	SUPPORT_STEP = BigDecimal.new('0.01')
 	BTC_COE = BigDecimal.new('4000')
 
-	attr_accessor :book, :supported, :good_position
+	attr_accessor :book, :supported, :good_position, :last_bid
 
 	def initialize (broker)
 		@broker = broker
+		@last_bid = 0
 	end
 
 	def make_analytics
@@ -115,16 +116,21 @@ class Analyst
 			order = @book[:asks].last
 
 			if order
-				@good_position = {
-					:type => :ask,
-					:price => order[:price] - SUPPORT_STEP
-				}
-				return
+				if @last_bid < order[:price] - SUPPORT_STEP or @last_bid > order[:price] + SUPPORT_STEP * 300
+					@good_position = {
+						:type => :ask,
+						:price => order[:price] - SUPPORT_STEP
+					}
+					return
+				end
 			end
 		else
 			order = @book[:bids].first
 
 			if order
+
+				@last_bid = order[:price] + SUPPORT_STEP
+
 				@good_position = {
 					:type => :bid,
 					:price => order[:price] + SUPPORT_STEP

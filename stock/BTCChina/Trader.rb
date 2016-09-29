@@ -3,7 +3,7 @@ require_relative 'Broker'
 
 class Trader
 
-	TRADE_INTERVAL = 1
+	TRADE_INTERVAL = 0.2
 
 	def initialize
 		@broker = Broker.new
